@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Premio Cotral - Operatori di Esercizio</title>
+    <!-- Caricamento Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        cotral: {
+                            blue: '#003366',
+                            light: '#0055A5',
+                            accent: '#0088CC',
+                            bg: '#F4F7FA',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-cotral-bg text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- HEADER ISTITUZIONALE -->
+    <header class="bg-gradient-to-r from-cotral-blue via-cotral-light to-cotral-blue text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white text-cotral-blue font-extrabold text-xl tracking-tight px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cotral-accent inline-block"></span>
+                    <span>cotral</span>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold leading-tight">Calcolatore Premio di Risultato</h1>
+                    <p class="text-xs sm:text-sm text-blue-100">Tabella Analitica KPI • Operatori di Esercizio</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button type="button" onclick="openModal('modal-tabella')" class="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg transition border border-white/20">
+                    <i data-lucide="table" class="w-4 h-4"></i>
+                    <span>Tabella Ufficiale</span>
+                </button>
+                <button type="button" onclick="resetAll()" class="flex items-center gap-1.5 bg-red-500/85 hover:bg-red-600 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg transition shadow-sm">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- Barra di Navigazione Tab -->
+        <nav aria-label="Sezioni calcolatore" class="bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
+            <button type="button" onclick="switchTab('tab-requisiti')" id="btn-tab-requisiti" class="tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition bg-cotral-blue text-white shadow-sm">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span>1. Requisiti & Esclusioni</span>
+            </button>
+            <button type="button" onclick="switchTab('tab-mensile')" id="btn-tab-mensile" class="tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
+                <i data-lucide="calculator" class="w-4 h-4"></i>
+                <span>2. Calcolo Mensile (KPI 1-3)</span>
+            </button>
+            <button type="button" onclick="switchTab('tab-semestrale')" id="btn-tab-semestrale" class="tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
+                <i data-lucide="award" class="w-4 h-4"></i>
+                <span>3. Bonus Semestrale (KPI 4)</span>
+            </button>
+            <button type="button" onclick="switchTab('tab-simulatore')" id="btn-tab-simulatore" class="tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
+                <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                <span>4. Simulatore 6 Mesi</span>
+            </button>
+            <button type="button" onclick="switchTab('tab-calendario')" id="btn-tab-calendario" class="tab-btn col-span-2 sm:col-span-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
+                <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                <span>5. Calendario & Diario</span>
+            </button>
+        </nav>
+
+        <!-- LAYOUT A DUE COLONNE -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- COLONNA SINISTRA -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- TAB 1: REQUISITI & CONDIZIONI DI ESCLUSIONE -->
+                <section id="tab-requisiti" class="tab-content space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-800 text-white px-5 py-3.5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="building-2" class="w-5 h-5 text-cotral-accent"></i>
+                                <h2 class="font-bold text-sm sm:text-base">Condizioni Aziendali (Annuale & Trimestrale)</h2>
+                            </div>
+                            <span class="text-xs bg-white/15 px-2.5 py-0.5 rounded-full">Pre-requisiti</span>
+                        </div>
+                        
+                        <div class="p-5 space-y-5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                <div>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-cotral-light">Condizione di Erogazione (KPI - Annuale)</span>
+                                    <h3 class="font-semibold text-slate-900 mt-0.5">Risultato d'esercizio positivo anno precedente</h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">Requisito fondamentale di bilancio aziendale per l'erogazione del premio.</p>
+                                </div>
+                                <label class="inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" id="req-annuale" checked onchange="calculateAll()" class="sr-only peer">
+                                    <div class="relative w-12 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                    <span id="lbl-req-annuale" class="ms-2.5 text-sm font-bold text-emerald-700">SÌ</span>
+                                </label>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div>
+                                        <span class="text-xs font-bold uppercase tracking-wider text-cotral-light">Accesso al Premio (KPI - Trimestrale)</span>
+                                        <h3 class="font-semibold text-slate-900 mt-0.5">Obiettivi Trimestrali Aziendali Raggiunti</h3>
+                                        <p class="text-xs text-slate-500 mt-0.5">Incremento rispetto alla baseline (media 2021-2025 / PEF approvato).</p>
+                                    </div>
+                                    <label class="inline-flex items-center cursor-pointer shrink-0">
+                                        <input type="checkbox" id="req-trimestrale" checked onchange="calculateAll()" class="sr-only peer">
+                                        <div class="relative w-12 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                        <span id="lbl-req-trimestrale" class="ms-2.5 text-sm font-bold text-emerald-700">SÌ</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-200 text-xs">
+                                    <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                                        <span class="font-bold text-slate-700 block">1. Produzione (Vett_km)</span>
+                                        <span class="text-slate-500">Incremento vs baseline PEF</span>
+                                    </div>
+                                    <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                                        <span class="font-bold text-slate-700 block">2. Ricavi Traffico Cotral (€)</span>
+                                        <span class="text-slate-500">Incremento vendite titoli Cotral</span>
+                                    </div>
+                                    <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                                        <span class="font-bold text-slate-700 block">3. Ricavi Diretti (num.)</span>
+                                        <span class="text-slate-500">Titoli venduti canali diretti</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-red-800 text-white px-5 py-3.5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="alert-octagon" class="w-5 h-5 text-red-200"></i>
+                                <h2 class="font-bold text-sm sm:text-base">Condizioni di Esclusione dalla Premialità (Mensile/Trimestrale)</h2>
+                            </div>
+                            <span class="text-xs bg-white/15 px-2.5 py-0.5 rounded-full">Verifica Individuale</span>
+                        </div>
+
+                        <div class="p-5 space-y-4">
+                            <p class="text-xs sm:text-sm text-slate-600 bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-xl flex items-start gap-2">
+                                <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5 text-amber-600"></i>
+                                <span>Se si verifica <strong>anche solo una</strong> delle seguenti condizioni, il premio mensile (KPI 1, 2, 2bis, 3) viene azzerato (0 €). Il <strong>Bonus Semestrale</strong> non risente di queste esclusioni mensili.</span>
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between">
+                                    <div>
+                                        <label for="excl-disciplinare" class="text-sm font-semibold text-slate-800 block">Provvedimenti disciplinari art. 42 &gt; 1 giorno</label>
+                                        <p class="text-xs text-slate-500 mt-0.5">Ad esclusione dei sinistri.</p>
+                                    </div>
+                                    <div class="mt-3 flex items-center gap-3">
+                                        <select id="excl-disciplinare" onchange="calculateAll()" class="w-full rounded-lg border-slate-300 border bg-white px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                            <option value="no" selected>No (Nessun provvedimento &gt; 1 gg)</option>
+                                            <option value="si">Sì (Provvedimento &gt; 1 giorno - Escluso)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70">
+                                    <span class="text-sm font-semibold text-slate-800 block">Malattia nel mese</span>
+                                    <p class="text-xs text-slate-500 mt-0.5">Escluso se <strong>&gt; 1 evento</strong> oppure <strong>&gt; 5 giorni</strong> totali.</p>
+                                    <div class="grid grid-cols-2 gap-3 mt-3">
+                                        <div>
+                                            <label for="excl-malattia-eventi" class="text-xs font-medium text-slate-600 block mb-1">N. Eventi</label>
+                                            <input type="number" id="excl-malattia-eventi" min="0" max="31" value="0" oninput="calculateAll()" class="w-full rounded-lg border-slate-300 border bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label for="excl-malattia-giorni" class="text-xs font-medium text-slate-600 block mb-1">Giorni Totali</label>
+                                            <input type="number" id="excl-malattia-giorni" min="0" max="31" value="0" oninput="calculateAll()" class="w-full rounded-lg border-slate-300 border bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70">
+                                    <label for="excl-turni-esigibili" class="text-sm font-semibold text-slate-800 block">Turni esigibili effettivamente coperti</label>
+                                    <p class="text-xs text-slate-500 mt-0.5">Escluso se <strong>&lt; 6 turni/mese</strong>.</p>
+                                    <div class="mt-3">
+                                        <input type="number" id="excl-turni-esigibili" min="0" max="31" value="22" oninput="calculateAll()" class="w-full rounded-lg border-slate-300 border bg-white px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70">
+                                    <label for="excl-turni-totali" class="text-sm font-semibold text-slate-800 block">Turni + Congedi + Formaz. + Collegio Med.</label>
+                                    <p class="text-xs text-slate-500 mt-0.5">Escluso se <strong>&lt; 22/mese</strong> (collegato al KPI 2).</p>
+                                    <div class="mt-3">
+                                        <input type="number" id="excl-turni-totali" min="0" max="31" value="24" oninput="syncTurniTotali(this.value)" class="w-full rounded-lg border-slate-300 border bg-white px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 md:col-span-2">
+                                    <span class="text-sm font-semibold text-slate-800 block">Sinistri definiti nel trimestre (con colpa)</span>
+                                    <p class="text-xs text-slate-500 mt-0.5">Escluso se nel trimestre si verificano contemporaneamente <strong>&gt; 1 sinistro con colpa</strong> E valore complessivo <strong>&gt; 7.000 €</strong>.</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                        <div>
+                                            <label for="excl-sinistri-num" class="text-xs font-medium text-slate-600 block mb-1">N. Sinistri con colpa (Trimestre)</label>
+                                            <input type="number" id="excl-sinistri-num" min="0" max="20" value="0" oninput="calculateAll()" class="w-full rounded-lg border-slate-300 border bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label for="excl-sinistri-valore" class="text-xs font-medium text-slate-600 block mb-1">Valore complessivo sinistri (€)</label>
+                                            <input type="number" id="excl-sinistri-valore" min="0" step="100" value="0" oninput="calculateAll()" class="w-full rounded-lg border-slate-300 border bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="button" onclick="switchTab('tab-mensile')" class="inline-flex items-center gap-2 bg-cotral-light hover:bg-cotral-blue text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm">
+                                    <span>Prosegui al Calcolo Mensile</span>
+                                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: CALCOLO MENSILE (KPI 1, 2, 2bis, 3) -->
+                <section id="tab-mensile" class="tab-content hidden space-y-6">
+                    <!-- KPI 1 -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-cotral-blue text-white px-5 py-3.5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-white text-cotral-blue font-extrabold text-xs px-2 py-0.5 rounded">KPI 1</span>
+                                <h2 class="font-bold text-sm sm:text-base">Regolarità - Rispetto Contratto di Servizio</h2>
+                            </div>
+                            <span id="badge-kpi1" class="text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full">50 €</span>
+                        </div>
+                        <div class="p-5 space-y-4">
+                            <p class="text-xs text-slate-500 italic">Formula: Servizi effettivamente resi (corse CdS + servizi non OSP validati) / servizi programmati</p>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                                <div>
+                                    <label for="kpi1-percent" class="text-xs font-bold uppercase text-slate-600 block mb-1.5">Percentuale di Regolarità (%)</label>
+                                    <div class="relative">
+                                        <input type="number" id="kpi1-percent" step="0.01" min="0" max="105" value="100.00" oninput="onKpi1PercentChange()" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-base font-bold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                        <span class="absolute right-4 top-3 text-slate-400 font-bold">%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="kpi1-fascia" class="text-xs font-bold uppercase text-slate-600 block mb-1.5">Oppure seleziona Fascia</label>
+                                    <select id="kpi1-fascia" onchange="onKpi1FasciaChange()" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                        <option value="1" selected>Fascia 1: &ge; 100% (50 €)</option>
+                                        <option value="2">Fascia 2: da 99,00% a 99,99% (30 €)</option>
+                                        <option value="3">Fascia 3: da 98,00% a 98,99% (10 €)</option>
+                                        <option value="4">Fascia 4: &lt; 98,00% (0 €)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-4 gap-2 pt-1 text-center text-xs">
+                                <div id="kpi1-box-1" class="p-2 rounded-lg border-2 border-cotral-light bg-blue-50 font-semibold">
+                                    <div class="text-slate-500">Fascia 1 (&ge;100%)</div>
+                                    <div class="text-cotral-blue font-bold text-sm">50 €</div>
+                                </div>
+                                <div id="kpi1-box-2" class="p-2 rounded-lg border border-slate-200 bg-slate-50">
+                                    <div class="text-slate-500">Fascia 2 (99-99.99%)</div>
+                                    <div class="text-slate-700 font-bold text-sm">30 €</div>
+                                </div>
+                                <div id="kpi1-box-3" class="p-2 rounded-lg border border-slate-200 bg-slate-50">
+                                    <div class="text-slate-500">Fascia 3 (98-98.99%)</div>
+                                    <div class="text-slate-700 font-bold text-sm">10 €</div>
+                                </div>
+                                <div id="kpi1-box-4" class="p-2 rounded-lg border border-slate-200 bg-slate-50">
+                                    <div class="text-slate-500">Fascia 4 (&lt;98%)</div>
+                                    <div class="text-slate-700 font-bold text-sm">0 €</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2 & 2BIS -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-cotral-blue text-white px-5 py-3.5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-white text-cotral-blue font-extrabold text-xs px-2 py-0.5 rounded">KPI 2 + 2bis</span>
+                                <h2 class="font-bold text-sm sm:text-base">Produttività & Moltiplicatore Ore Eccedenza</h2>
+                            </div>
+                            <span id="badge-kpi2-tot" class="text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full">60,00 €</span>
+                        </div>
+
+                        <div class="p-5 space-y-5">
+                            <p class="text-xs text-slate-500 italic">Tasso di copertura mensile turni di servizio e fruizione congedi, formazione e collegio medico = turni effettuati (su singolo giorno escluso doppie battute).</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                                    <label for="kpi2-turni" class="text-xs font-bold uppercase text-slate-700 block">2) Turni Coperti nel Mese</label>
+                                    <input type="number" id="kpi2-turni" min="0" max="31" value="24" oninput="syncTurniTotali(this.value)" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-base font-bold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    <div class="flex items-center justify-between text-xs pt-1">
+                                        <span class="text-slate-500">Fascia KPI 2: <strong id="kpi2-fascia-label" class="text-cotral-blue">Fascia 2</strong></span>
+                                        <span class="text-slate-500">Base: <strong id="kpi2-base-label" class="text-slate-800">60 €</strong></span>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                                    <label for="kpi2bis-ore" class="text-xs font-bold uppercase text-slate-700 block">2bis) Ore di Eccedenza nel Mese</label>
+                                    <input type="number" id="kpi2bis-ore" step="0.01" min="-50" max="300" value="8" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-base font-bold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    <div class="flex items-center justify-between text-xs pt-1">
+                                        <span class="text-slate-500">Scaglione: <strong id="kpi2bis-col-label" class="text-cotral-blue">&le; 10 ore (0..10)</strong></span>
+                                        <span class="text-slate-500">Moltiplicatore: <strong id="kpi2bis-mult-label" class="text-emerald-700 text-sm">1,0x</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase text-slate-600">Matrice Moltiplicatore KPI 2bis (Cella attiva evidenziata)</span>
+                                    <span class="text-xs text-slate-500">Calcolo: <strong id="kpi2-formula-preview" class="text-slate-800">60 € × 1,0 = 60,00 €</strong></span>
+                                </div>
+                                
+                                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                                    <table class="w-full text-xs text-center border-collapse">
+                                        <thead>
+                                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                                <th class="p-2.5 text-left">Fascia KPI 2 (Turni)</th>
+                                                <th class="p-2.5">&gt; 20 ore/mese</th>
+                                                <th class="p-2.5">&gt; 15 &le; 20</th>
+                                                <th class="p-2.5">&gt; 10 &le; 15</th>
+                                                <th class="p-2.5">&le; 10 (da 0 a 10)</th>
+                                                <th class="p-2.5">&lt; 0</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="matrix-body" class="divide-y divide-slate-200"></tbody>
+                                    </table>
+                                </div>
+                                <p class="text-[11px] text-slate-500">Nota: Inserisci un valore negativo (es. <code class="bg-slate-100 px-1 rounded">-1</code>) se le ore di eccedenza risultano inferiori a zero (&lt; 0, moltiplicatore 0,0). Con 0 fino a 10 ore si applica il moltiplicatore base 1,0.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3 -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-cotral-blue text-white px-5 py-3.5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-white text-cotral-blue font-extrabold text-xs px-2 py-0.5 rounded">KPI 3</span>
+                                <h2 class="font-bold text-sm sm:text-base">Incidentalità con Colpa (Premialità o Decurtazione)</h2>
+                            </div>
+                            <span id="badge-kpi3" class="text-xs font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full">+ 30 €</span>
+                        </div>
+                        <div class="p-5 space-y-3">
+                            <p class="text-xs text-slate-500">Se non hai avuto incidenti con colpa nel mese ottieni un bonus aggiuntivo di <strong>+30 €</strong>. In caso di sinistro passivo, si applica una decurtazione percentuale sul premio maturato nei punti precedenti.</p>
+                            
+                            <div class="space-y-2" id="kpi3-options">
+                                <label class="flex items-center justify-between p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 cursor-pointer transition kpi3-card" data-fascia="1">
+                                    <div class="flex items-center gap-3">
+                                        <input type="radio" name="kpi3-fascia" value="1" checked onchange="calculateAll()" class="w-4 h-4 text-cotral-blue focus:ring-cotral-light">
+                                        <div>
+                                            <span class="font-bold text-sm text-slate-800 block">Fascia 1: Nessun incidente con colpa</span>
+                                            <span class="text-xs text-slate-500">Premialità aggiuntiva mensile</span>
+                                        </div>
+                                    </div>
+                                    <span class="font-extrabold text-sm text-emerald-700 bg-emerald-100 px-3 py-1 rounded-lg">+ 30 €</span>
+                                </label>
+
+                                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition kpi3-card" data-fascia="2">
+                                    <div class="flex items-center gap-3">
+                                        <input type="radio" name="kpi3-fascia" value="2" onchange="calculateAll()" class="w-4 h-4 text-cotral-blue focus:ring-cotral-light">
+                                        <div>
+                                            <span class="font-bold text-sm text-slate-800 block">Fascia 2: 1 sinistro passivo con costi &le; 3.500 €</span>
+                                            <span class="text-xs text-slate-500">Decurtazione sul premio totale del mese</span>
+                                        </div>
+                                    </div>
+                                    <span class="font-extrabold text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-lg">- 20%</span>
+                                </label>
+
+                                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition kpi3-card" data-fascia="3">
+                                    <div class="flex items-center gap-3">
+                                        <input type="radio" name="kpi3-fascia" value="3" onchange="calculateAll()" class="w-4 h-4 text-cotral-blue focus:ring-cotral-light">
+                                        <div>
+                                            <span class="font-bold text-sm text-slate-800 block">Fascia 3: 1 sinistro passivo con costi &gt; 3.500 € e &le; 5.000 €</span>
+                                            <span class="text-xs text-slate-500">Decurtazione sul premio totale del mese</span>
+                                        </div>
+                                    </div>
+                                    <span class="font-extrabold text-sm text-orange-700 bg-orange-100 px-3 py-1 rounded-lg">- 50%</span>
+                                </label>
+
+                                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition kpi3-card" data-fascia="4">
+                                    <div class="flex items-center gap-3">
+                                        <input type="radio" name="kpi3-fascia" value="4" onchange="calculateAll()" class="w-4 h-4 text-cotral-blue focus:ring-cotral-light">
+                                        <div>
+                                            <span class="font-bold text-sm text-slate-800 block">Fascia 4: 1 sinistro passivo con costi &gt; 5.000 € e &le; 7.000 €</span>
+                                            <span class="text-xs text-slate-500">Decurtazione sul premio totale del mese</span>
+                                        </div>
+                                    </div>
+                                    <span class="font-extrabold text-sm text-red-700 bg-red-100 px-3 py-1 rounded-lg">- 80%</span>
+                                </label>
+
+                                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition kpi3-card" data-fascia="5">
+                                    <div class="flex items-center gap-3">
+                                        <input type="radio" name="kpi3-fascia" value="5" onchange="calculateAll()" class="w-4 h-4 text-cotral-blue focus:ring-cotral-light">
+                                        <div>
+                                            <span class="font-bold text-sm text-slate-800 block">Fascia 5: 1 sinistro passivo con costi &gt; 7.000 €</span>
+                                            <span class="text-xs text-slate-500">Azzeramento totale del premio mensile</span>
+                                        </div>
+                                    </div>
+                                    <span class="font-extrabold text-sm text-red-800 bg-red-200 px-3 py-1 rounded-lg">- 100%</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: BONUS SEMESTRALE (KPI 4) -->
+                <section id="tab-semestrale" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-cotral-blue to-cotral-light text-white px-5 py-3.5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-white text-cotral-blue font-extrabold text-xs px-2 py-0.5 rounded">KPI 4</span>
+                                <h2 class="font-bold text-sm sm:text-base">Bonus Semestrale (Welfare & Festivi)</h2>
+                            </div>
+                            <span id="badge-kpi4" class="text-xs font-bold bg-white/20 text-white px-2.5 py-1 rounded-full">460 €</span>
+                        </div>
+
+                        <div class="p-5 space-y-6">
+                            <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-cotral-blue flex items-start gap-2.5">
+                                <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5 text-cotral-light"></i>
+                                <div class="text-xs sm:text-sm">
+                                    <strong>Regola importante dalla Tabella Ufficiale:</strong> <em>"Non tiene conto delle condizioni di accesso dei singoli mesi."</em> Anche se hai avuto un mese di esclusione (es. malattia &gt; 5 gg o &gt; 1 evento), i turni coperti contribuiscono comunque al raggiungimento del Bonus Semestrale (salvo bilancio aziendale negativo).
+                                </div>
+                            </div>
+
+                            <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <span class="text-xs font-bold uppercase text-cotral-light">Quota Portale Welfare</span>
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">Turni esigibili + Congedi + Formazione + Collegio Medico nel semestre</h3>
+                                        <p class="text-xs text-slate-500">Su singolo giorno escluse doppie battute. Target: <strong>&ge; 139</strong> nel semestre.</p>
+                                    </div>
+                                    <span id="kpi4-welfare-badge" class="self-start sm:self-center text-sm font-extrabold px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800">400 € Welfare</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
+                                    <div>
+                                        <label for="kpi4-turni-sem" class="text-xs font-semibold text-slate-600 block mb-1">Totale Turni/Presenze Semestre</label>
+                                        <input type="number" id="kpi4-turni-sem" min="0" max="200" value="142" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-bold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    </div>
+                                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                        <div class="flex justify-between text-xs mb-1">
+                                            <span class="font-medium text-slate-600">Avanzamento Target (139)</span>
+                                            <span id="kpi4-progress-text" class="font-bold text-emerald-600">142 / 139 (Raggiunto!)</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                                            <div id="kpi4-progress-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <span class="text-xs font-bold uppercase text-cotral-light">Quota Domeniche e Festivi</span>
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">Turni esigibili Domeniche e Festivi coperti nel semestre</h3>
+                                        <p class="text-xs text-slate-500">Su singolo giorno escluse doppie battute.</p>
+                                    </div>
+                                    <span id="kpi4-festivi-badge" class="self-start sm:self-center text-sm font-extrabold px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800">60 €</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
+                                    <div>
+                                        <label for="kpi4-festivi-num" class="text-xs font-semibold text-slate-600 block mb-1">Numero Domeniche/Festivi coperti</label>
+                                        <input type="number" id="kpi4-festivi-num" min="0" max="60" value="10" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-bold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    </div>
+                                    <div class="grid grid-cols-5 gap-1.5 text-center text-xs">
+                                        <div id="fest-box-0" class="p-2 rounded-lg border border-slate-200 bg-white">
+                                            <div class="text-slate-400">&lt; 6</div>
+                                            <div class="font-bold text-slate-600">0 €</div>
+                                        </div>
+                                        <div id="fest-box-1" class="p-2 rounded-lg border border-slate-200 bg-white">
+                                            <div class="text-slate-500">6 - 8</div>
+                                            <div class="font-bold text-slate-800">40 €</div>
+                                        </div>
+                                        <div id="fest-box-2" class="p-2 rounded-lg border-2 border-cotral-light bg-blue-50">
+                                            <div class="text-cotral-blue font-semibold">9 - 10</div>
+                                            <div class="font-bold text-cotral-blue">60 €</div>
+                                        </div>
+                                        <div id="fest-box-3" class="p-2 rounded-lg border border-slate-200 bg-white">
+                                            <div class="text-slate-500">11 - 12</div>
+                                            <div class="font-bold text-slate-800">80 €</div>
+                                        </div>
+                                        <div id="fest-box-4" class="p-2 rounded-lg border border-slate-200 bg-white">
+                                            <div class="text-slate-500">&ge; 13</div>
+                                            <div class="font-bold text-slate-800">100 €</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 4: SIMULATORE PROIEZIONE 6 MESI -->
+                <section id="tab-simulatore" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-800 text-white px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar-range" class="w-5 h-5 text-cotral-accent"></i>
+                                <h2 class="font-bold text-sm sm:text-base">Simulatore Completo Semestre (6 Mesi)</h2>
+                            </div>
+                            <button type="button" onclick="copyCurrentMonthToAll()" class="text-xs bg-cotral-light hover:bg-cotral-accent text-white font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 self-start sm:self-auto">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <span>Applica Mese Corrente a tutti i 6 mesi</span>
+                            </button>
+                        </div>
+
+                        <div class="p-5 space-y-4">
+                            <p class="text-xs text-slate-600">Salva la configurazione del mese corrente in uno slot mensile per simulare un semestre personalizzato (ogni mese si ricalcola automaticamente se modifichi i requisiti aziendali).</p>
+
+                            <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <label for="sim-target-month" class="text-xs font-bold text-slate-700">Salva configurazione attuale su:</label>
+                                <select id="sim-target-month" class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold">
+                                    <option value="0">Mese 1 (Gen / Lug)</option>
+                                    <option value="1">Mese 2 (Feb / Ago)</option>
+                                    <option value="2">Mese 3 (Mar / Set)</option>
+                                    <option value="3">Mese 4 (Apr / Ott)</option>
+                                    <option value="4">Mese 5 (Mag / Nov)</option>
+                                    <option value="5">Mese 6 (Giu / Dic)</option>
+                                </select>
+                                <button type="button" onclick="saveCurrentToMonth()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                                    Salva Mese
+                                </button>
+                                <button type="button" onclick="syncSemestraleFromSim()" class="ml-auto bg-cotral-blue hover:bg-cotral-light text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                                    Usa somma turni per KPI 4
+                                </button>
+                            </div>
+
+                            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                            <th class="p-3">Mese</th>
+                                            <th class="p-3">Regol. (KPI 1)</th>
+                                            <th class="p-3">Turni (KPI 2)</th>
+                                            <th class="p-3">Ecced. (2bis)</th>
+                                            <th class="p-3">Incid. (KPI 3)</th>
+                                            <th class="p-3">Stato</th>
+                                            <th class="p-3 text-right">Premio Netto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sim-table-body" class="divide-y divide-slate-200"></tbody>
+                                    <tfoot class="bg-slate-50 font-bold text-slate-800 border-t-2 border-slate-300">
+                                        <tr>
+                                            <td colspan="2" class="p-3">Totale Semestre (6 mesi)</td>
+                                            <td class="p-3" id="sim-tot-turni">144 turni</td>
+                                            <td colspan="3" class="p-3 text-slate-500 font-normal">Somma quote mensili maturate</td>
+                                            <td class="p-3 text-right text-sm text-cotral-blue font-extrabold" id="sim-tot-euro">0,00 €</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 5: CALENDARIO ANNUALE & DIARIO GIORNALIERO -->
+                <section id="tab-calendario" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-cotral-blue to-cotral-light text-white px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar-days" class="w-5 h-5 text-blue-100"></i>
+                                <div>
+                                    <h2 class="font-bold text-sm sm:text-base">Calendario Mensile & Diario Giorni</h2>
+                                    <p class="text-[11px] text-blue-100">Turno/Vettura, durata turno e straordinario con conteggio sessagesimale (HH:MM)</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <label for="cal-year" class="sr-only">Anno</label>
+                                <select id="cal-year" onchange="renderCalendar()" class="rounded-lg bg-white/95 text-slate-900 text-xs font-bold px-2.5 py-1.5 border border-white/30 focus:outline-none">
+                                    <option value="2025">2025</option>
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2027">2027</option>
+                                </select>
+
+                                <label for="cal-month" class="sr-only">Mese</label>
+                                <select id="cal-month" onchange="renderCalendar()" class="rounded-lg bg-white/95 text-slate-900 text-xs font-bold px-2.5 py-1.5 border border-white/30 focus:outline-none">
+                                    <option value="0">Gennaio</option>
+                                    <option value="1">Febbraio</option>
+                                    <option value="2">Marzo</option>
+                                    <option value="3">Aprile</option>
+                                    <option value="4">Maggio</option>
+                                    <option value="5">Giugno</option>
+                                    <option value="6">Luglio</option>
+                                    <option value="7">Agosto</option>
+                                    <option value="8">Settembre</option>
+                                    <option value="9">Ottobre</option>
+                                    <option value="10" selected>Novembre</option>
+                                    <option value="11">Dicembre</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="p-5 space-y-5">
+                            <!-- Riepilogo contatori mese selezionato -->
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center text-xs">
+                                <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                                    <span class="text-slate-500 block">Esigibili / Utili</span>
+                                    <strong id="cal-stat-utili" class="text-sm sm:text-base font-extrabold text-cotral-blue">0 / 0</strong>
+                                </div>
+                                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+                                    <span class="text-amber-800 block">Sabati / Dom&amp;Fest</span>
+                                    <strong id="cal-stat-sab-domfest" class="text-sm sm:text-base font-extrabold text-amber-800">0 / 0</strong>
+                                </div>
+                                <div class="p-3 rounded-xl bg-purple-50 border border-purple-200">
+                                    <span class="text-purple-800 block">Malattia (gg / ev.)</span>
+                                    <strong id="cal-stat-malattia" class="text-sm sm:text-base font-extrabold text-purple-700">0 / 0</strong>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                                    <span class="text-slate-600 block">Durata Turni</span>
+                                    <strong id="cal-stat-durata-turni" class="text-sm sm:text-base font-extrabold text-slate-800">00:00</strong>
+                                </div>
+                                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                                    <span class="text-emerald-800 block">Straordinario</span>
+                                    <strong id="cal-stat-straord" class="text-sm sm:text-base font-extrabold text-emerald-700">00:00</strong>
+                                </div>
+                                <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200">
+                                    <span class="text-indigo-800 block">Totale Ore (60)</span>
+                                    <strong id="cal-stat-tot-ore" class="text-sm sm:text-base font-extrabold text-indigo-700">00:00</strong>
+                                </div>
+                            </div>
+
+                            <!-- Nota regole sessagesimali e voci -->
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex flex-wrap gap-x-4 gap-y-1">
+                                <span><strong>Base sessagesimale:</strong> inserisci ore e minuti come <code class="bg-white px-1 py-0.5 rounded border">7:30</code>, <code class="bg-white px-1 py-0.5 rounded border">1.45</code> o <code class="bg-white px-1 py-0.5 rounded border">1h45m</code> (60 min = 1 ora)</span>
+                                <span><strong>Malattia:</strong> esclusa se &gt; 1 evento o &gt; 5 gg</span>
+                                <span><strong>Festività &amp; Distacco aziendale:</strong> esigibili</span>
+                                <span><strong>Distacco sindacale / Recupero riposo / Assenza non esigibile:</strong> non esigibili</span>
+                            </div>
+
+                            <!-- Azioni rapide sul mese -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="fillWorkdaysWithShifts()" class="bg-white hover:bg-slate-100 text-slate-800 font-semibold px-3 py-1.5 rounded-lg border border-slate-300 transition">
+                                        Imposta feriali come Turno Coperto
+                                    </button>
+                                    <button type="button" onclick="clearCurrentMonthCalendar()" class="bg-white hover:bg-red-50 text-red-700 font-semibold px-3 py-1.5 rounded-lg border border-red-200 transition">
+                                        Svuota mese
+                                    </button>
+                                </div>
+                                <button type="button" onclick="applyCalendarToKpis()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                                    <span>Applica conteggi ai KPI</span>
+                                </button>
+                            </div>
+
+                            <!-- Legenda -->
+                            <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
+                                <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-200 border border-amber-400 inline-block"></span> Sabato</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-rose-200 border border-rose-400 inline-block"></span> Domenica / Festività nazionale</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-200 border border-emerald-400 inline-block"></span> Esigibile / Festivo</span>
+                            </div>
+
+                            <!-- Elenco giorno per giorno del mese selezionato -->
+                            <div id="calendar-days-list" class="space-y-2.5"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- COLONNA DESTRA: RIEPILOGO STICKY -->
+            <aside class="lg:col-span-4 lg:sticky lg:top-24 space-y-4">
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                    <div class="bg-cotral-blue text-white px-5 py-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-blue-200">Riepilogo Calcolo</span>
+                            <span id="status-pill" class="text-xs font-bold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Idoneo
+                            </span>
+                        </div>
+                        <h3 class="text-lg font-bold mt-1">Dettaglio Premio</h3>
+                    </div>
+
+                    <div id="exclusion-alert" class="hidden bg-red-50 border-b border-red-200 p-4 text-red-800">
+                        <div class="flex items-start gap-2.5">
+                            <i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+                            <div class="text-xs space-y-1">
+                                <p class="font-bold text-sm text-red-900">Premio Mensile Azzerato (0 €)</p>
+                                <p>Motivo/i di esclusione rilevati:</p>
+                                <ul id="exclusion-reasons-list" class="list-disc list-inside font-semibold text-red-700 space-y-0.5"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 space-y-4">
+                        <div class="space-y-2.5 text-sm">
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>1) Regolarità (KPI 1)</span>
+                                <span id="sum-kpi1" class="font-bold text-slate-800">50,00 €</span>
+                            </div>
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>2) Produttività Base (KPI 2)</span>
+                                <span id="sum-kpi2-base" class="font-semibold text-slate-800">60,00 €</span>
+                            </div>
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>2bis) Moltiplicatore (<span id="sum-mult">1,0x</span>)</span>
+                                <span id="sum-kpi2-tot" class="font-bold text-cotral-blue">60,00 €</span>
+                            </div>
+                            <div class="flex items-center justify-between text-slate-600 pt-1 border-t border-dashed border-slate-200">
+                                <span>Subtotale KPI 1 + (2 × 2bis)</span>
+                                <span id="sum-subtotal" class="font-bold text-slate-800">110,00 €</span>
+                            </div>
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>3) Incidentalità (KPI 3)</span>
+                                <span id="sum-kpi3" class="font-bold text-emerald-600">+ 30,00 €</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-bold uppercase text-cotral-light block">Premio Mensile Netto</span>
+                                    <span class="text-[11px] text-slate-500">Quota mese singolo</span>
+                                </div>
+                                <span id="total-mensile" class="text-2xl sm:text-3xl font-extrabold text-cotral-blue">140,00 €</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-200 space-y-2.5 text-sm">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Bonus Semestrale (KPI 4)</span>
+                            
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>Quota Portale Welfare (&ge;139)</span>
+                                <span id="sum-kpi4-welfare" class="font-bold text-slate-800">400,00 €</span>
+                            </div>
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>Quota Domeniche e Festivi</span>
+                                <span id="sum-kpi4-festivi" class="font-bold text-slate-800">60,00 €</span>
+                            </div>
+
+                            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-bold uppercase text-emerald-800 block">Totale Bonus Semestrale</span>
+                                    <span class="text-[11px] text-emerald-600">Indipendente esclusioni mensili</span>
+                                </div>
+                                <span id="total-semestrale" class="text-xl font-extrabold text-emerald-700">460,00 €</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-slate-800 text-white flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-bold uppercase text-slate-300 block">Stima Totale Semestre</span>
+                                <span class="text-[11px] text-slate-400">6 Mesi Simulati + Bonus KPI 4</span>
+                            </div>
+                            <span id="total-grand-semestre" class="text-lg font-extrabold text-amber-400">1.300,00 €</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+            <p>Strumento di simulazione basato sulla <strong>Tabella Analitica KPI - Operatori di Esercizio (Cotral)</strong>.</p>
+            <p>I calcoli hanno valore indicativo e di supporto alla verifica personale.</p>
+        </div>
+    </footer>
+
+    <!-- MODALE TABELLA UFFICIALE -->
+    <div id="modal-tabella" role="dialog" aria-modal="true" aria-labelledby="modal-tabella-title" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-cotral-blue text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                    <h3 id="modal-tabella-title" class="font-bold text-base sm:text-lg">Tabella Analitica KPI - Operatori di Esercizio (Riferimento)</h3>
+                </div>
+                <button type="button" onclick="closeModal('modal-tabella')" aria-label="Chiudi modale" class="text-white/80 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-5 text-xs sm:text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <h4 class="font-bold text-cotral-blue mb-1.5">Condizioni di Accesso</h4>
+                        <ul class="list-disc list-inside space-y-1 text-slate-700 text-xs">
+                            <li><strong>Annuale:</strong> Risultato d'esercizio positivo anno precedente.</li>
+                            <li><strong>Trimestrale:</strong> Incremento Produzione (Vett_km), Ricavi Traffico Cotral (€) e Ricavi Diretti (num.) vs baseline.</li>
+                        </ul>
+                    </div>
+                    <div class="p-3.5 bg-red-50 rounded-xl border border-red-200">
+                        <h4 class="font-bold text-red-800 mb-1.5">Condizioni di Esclusione</h4>
+                        <ul class="list-disc list-inside space-y-1 text-red-900 text-xs">
+                            <li>Provvedimenti disciplinari art. 42 &gt; 1 giorno (escluso sinistri).</li>
+                            <li>&gt; 1 evento di malattia o &gt; 5 giorni di malattia per mese.</li>
+                            <li>Turni esigibili coperti &lt; 6/mese.</li>
+                            <li>Turni esigibili + Congedi + Formazione + Collegio Medico &lt; 22/mese.</li>
+                            <li>Sinistri definiti per trimestre: &gt; 1 sinistro con colpa E valore &gt; 7.000 €.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <table class="w-full text-xs border border-slate-300">
+                        <thead class="bg-slate-200 font-bold">
+                            <tr><th colspan="3" class="p-2 text-left">1) Regolarità - Rispetto Contratto di Servizio</th></tr>
+                            <tr class="bg-slate-100"><th class="p-2 border">Fascia</th><th class="p-2 border">Target</th><th class="p-2 border">Premio/mese</th></tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <tr><td class="p-1.5 border">1</td><td class="p-1.5 border">&ge; 100%</td><td class="p-1.5 border font-bold">50 €</td></tr>
+                            <tr><td class="p-1.5 border">2</td><td class="p-1.5 border">99,00% - 99,99%</td><td class="p-1.5 border font-bold">30 €</td></tr>
+                            <tr><td class="p-1.5 border">3</td><td class="p-1.5 border">98,00% - 98,99%</td><td class="p-1.5 border font-bold">10 €</td></tr>
+                            <tr><td class="p-1.5 border">4</td><td class="p-1.5 border">&lt; 98%</td><td class="p-1.5 border font-bold">0 €</td></tr>
+                        </tbody>
+                    </table>
+
+                    <table class="w-full text-xs border border-slate-300">
+                        <thead class="bg-slate-200 font-bold">
+                            <tr><th colspan="3" class="p-2 text-left">2) Produttività - Copertura turni di servizio</th></tr>
+                            <tr class="bg-slate-100"><th class="p-2 border">Fascia</th><th class="p-2 border">Target</th><th class="p-2 border">Premio/mese</th></tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <tr><td class="p-1.5 border">1</td><td class="p-1.5 border">&ge; 25</td><td class="p-1.5 border font-bold">85 €</td></tr>
+                            <tr><td class="p-1.5 border">2</td><td class="p-1.5 border">24</td><td class="p-1.5 border font-bold">60 €</td></tr>
+                            <tr><td class="p-1.5 border">3</td><td class="p-1.5 border">23</td><td class="p-1.5 border font-bold">45 €</td></tr>
+                            <tr><td class="p-1.5 border">4</td><td class="p-1.5 border">&lt; 23/mese (o =22)</td><td class="p-1.5 border font-bold">0 €</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table class="w-full text-xs border border-slate-300 text-center">
+                    <thead class="bg-slate-200 font-bold">
+                        <tr><th colspan="6" class="p-2 text-left">2bis) Moltiplicatore sulla base ore di eccedenza del KPI 2</th></tr>
+                        <tr class="bg-slate-100">
+                            <th class="p-2 border">Fascia KPI 2</th>
+                            <th class="p-2 border">&gt; 20 ore/mese</th>
+                            <th class="p-2 border">&gt; 15 &le; 20</th>
+                            <th class="p-2 border">&gt; 10 &le; 15</th>
+                            <th class="p-2 border">&le; 10</th>
+                            <th class="p-2 border">&lt; 0</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-1.5 border font-bold">1</td><td class="p-1.5 border">1,9</td><td class="p-1.5 border">1,7</td><td class="p-1.5 border">1,5</td><td class="p-1.5 border">1,0</td><td class="p-1.5 border">0,0</td></tr>
+                        <tr><td class="p-1.5 border font-bold">2</td><td class="p-1.5 border">2,3</td><td class="p-1.5 border">2,0</td><td class="p-1.5 border">1,7</td><td class="p-1.5 border">1,0</td><td class="p-1.5 border">0,0</td></tr>
+                        <tr><td class="p-1.5 border font-bold">3</td><td class="p-1.5 border">2,6</td><td class="p-1.5 border">2,3</td><td class="p-1.5 border">1,9</td><td class="p-1.5 border">1,0</td><td class="p-1.5 border">0,0</td></tr>
+                        <tr><td class="p-1.5 border font-bold">4</td><td class="p-1.5 border">0,0</td><td class="p-1.5 border">0,0</td><td class="p-1.5 border">0,0</td><td class="p-1.5 border">0,0</td><td class="p-1.5 border">0,0</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <table class="w-full text-xs border border-slate-300">
+                        <thead class="bg-slate-200 font-bold">
+                            <tr><th colspan="3" class="p-2 text-left">3) Incidentalità con colpa</th></tr>
+                            <tr class="bg-slate-100"><th class="p-2 border">Fascia</th><th class="p-2 border">Target</th><th class="p-2 border">Effetto</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="p-1.5 border text-center">1</td><td class="p-1.5 border">Nessun incidente con colpa</td><td class="p-1.5 border text-center font-bold text-emerald-700">+ 30 €</td></tr>
+                            <tr><td class="p-1.5 border text-center">2</td><td class="p-1.5 border">1 sinistro passivo &le; 3.500 €</td><td class="p-1.5 border text-center font-bold text-red-600">- 20%</td></tr>
+                            <tr><td class="p-1.5 border text-center">3</td><td class="p-1.5 border">1 sinistro passivo &gt; 3.500 &le; 5.000 €</td><td class="p-1.5 border text-center font-bold text-red-600">- 50%</td></tr>
+                            <tr><td class="p-1.5 border text-center">4</td><td class="p-1.5 border">1 sinistro passivo &gt; 5.000 &le; 7.000 €</td><td class="p-1.5 border text-center font-bold text-red-600">- 80%</td></tr>
+                            <tr><td class="p-1.5 border text-center">5</td><td class="p-1.5 border">1 sinistro passivo &gt; 7.000 €</td><td class="p-1.5 border text-center font-bold text-red-600">- 100%</td></tr>
+                        </tbody>
+                    </table>
+
+                    <table class="w-full text-xs border border-slate-300">
+                        <thead class="bg-slate-200 font-bold">
+                            <tr><th colspan="3" class="p-2 text-left">4) BONUS Semestrale (no esclusioni mensili)</th></tr>
+                            <tr class="bg-slate-100"><th class="p-2 border">Voce</th><th class="p-2 border">Target</th><th class="p-2 border">Premio</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="p-1.5 border">Turni + Congedi + Form. + Coll.</td><td class="p-1.5 border text-center">&ge; 139</td><td class="p-1.5 border text-center font-bold">400 € (Welfare)</td></tr>
+                            <tr><td class="p-1.5 border" rowspan="4">Domeniche e Festivi coperti</td><td class="p-1.5 border text-center">6 - 8</td><td class="p-1.5 border text-center font-bold">40 €</td></tr>
+                            <tr><td class="p-1.5 border text-center">9 - 10</td><td class="p-1.5 border text-center font-bold">60 €</td></tr>
+                            <tr><td class="p-1.5 border text-center">11 - 12</td><td class="p-1.5 border text-center font-bold">80 €</td></tr>
+                            <tr><td class="p-1.5 border text-center">&ge; 13</td><td class="p-1.5 border text-center font-bold">100 €</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-slate-100 px-6 py-3 flex justify-end border-t border-slate-200">
+                <button type="button" onclick="closeModal('modal-tabella')" class="bg-cotral-blue text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-cotral-light transition">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICA -->
+    <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-msg">Operazione completata</span>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'cotral_pdr_state_v6';
+
+        const MULTIPLIER_MATRIX = [
+            [1.9, 1.7, 1.5, 1.0, 0.0],
+            [2.3, 2.0, 1.7, 1.0, 0.0],
+            [2.6, 2.3, 1.9, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0]
+        ];
+
+        const FASCIA2_LABELS = [
+            "Fascia 1 (≥ 25) • 85 €",
+            "Fascia 2 (24) • 60 €",
+            "Fascia 3 (23) • 45 €",
+            "Fascia 4 (< 23) • 0 €"
+        ];
+
+        const WEEKDAY_NAMES_SHORT = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+
+        const ESIGIBILE_ACTIVITIES = new Set(["turno", "lavorativo", "distacco_aziendale"]);
+        const UTILE_ACTIVITIES = new Set(["turno", "lavorativo", "distacco_aziendale", "congedo", "formazione", "collegio"]);
+        const NON_ESIGIBILE_ACTIVITIES = new Set(["recupero_riposo", "distacco_sindacale", "assenza_non_esigibile"]);
+
+        const DEFAULT_MONTHS = [
+            { name: "Mese 1 (Gen / Lug)", kpi1: 50, turni: 24, ore: 8, kpi3: 1, excluded: false },
+            { name: "Mese 2 (Feb / Ago)", kpi1: 50, turni: 24, ore: 8, kpi3: 1, excluded: false },
+            { name: "Mese 3 (Mar / Set)", kpi1: 50, turni: 24, ore: 8, kpi3: 1, excluded: false },
+            { name: "Mese 4 (Apr / Ott)", kpi1: 50, turni: 24, ore: 8, kpi3: 1, excluded: false },
+            { name: "Mese 5 (Mag / Nov)", kpi1: 50, turni: 24, ore: 8, kpi3: 1, excluded: false },
+            { name: "Mese 6 (Giu / Dic)", kpi1: 50, turni: 24, ore: 8, kpi3: 1, excluded: false }
+        ];
+
+        let simulatedMonths = structuredClone(DEFAULT_MONTHS);
+        let calendarEntries = {};
+
+        // --- FUNZIONI SESSAGESIMALI (BASE 60) ---
+        function parseSexagesimalToMinutes(raw) {
+            if (raw === null || raw === undefined) return 0;
+            const str = String(raw).trim();
+            if (!str) return 0;
+
+            const negative = str.startsWith('-');
+            const clean = str.replace(/^-/, '').replace(/\s+/g, '');
+
+            // Formato esplicito tipo "7h30m" o "7h" o "45m"
+            const hmMatch = clean.match(/^(?:(\d+)h)?(?:(\d+)m)?$/i);
+            if (hmMatch && (hmMatch[1] || hmMatch[2])) {
+                const h = parseInt(hmMatch[1] || '0', 10);
+                const m = parseInt(hmMatch[2] || '0', 10);
+                const total = h * 60 + m;
+                return negative ? -total : total;
+            }
+
+            // Formato separato da ":" o "." (es. "7:30" o "1.45" -> 1 ora e 45 minuti)
+            if (clean.includes(':') || clean.includes('.')) {
+                const parts = clean.split(/[:.]/);
+                const h = parseInt(parts[0] || '0', 10) || 0;
+                const mRaw = (parts[1] || '0').padEnd(2, '0').slice(0, 2);
+                const m = parseInt(mRaw, 10) || 0;
+                const total = h * 60 + m;
+                return negative ? -total : total;
+            }
+
+            // Solo numeri: se >= 100 interpreta ultime 2 cifre come minuti (es. "730" -> 7h 30m), altrimenti minuti
+            const num = parseInt(clean, 10) || 0;
+            if (Math.abs(num) >= 100) {
+                const absNum = Math.abs(num);
+                const h = Math.floor(absNum / 100);
+                const m = absNum % 100;
+                const total = h * 60 + m;
+                return negative ? -total : total;
+            }
+
+            return negative ? -Math.abs(num) : num;
+        }
+
+        function formatMinutesToSexagesimal(totalMinutes) {
+            const sign = totalMinutes < 0 ? '-' : '';
+            const absMin = Math.abs(Math.round(totalMinutes));
+            const h = Math.floor(absMin / 60);
+            const m = absMin % 60;
+            return `${sign}${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        function getEasterDate(year) {
+            const a = year % 19;
+            const b = Math.floor(year / 100);
+            const c = year % 100;
+            const d = Math.floor(b / 4);
+            const e = b % 4;
+            const f = Math.floor((b + 8) / 25);
+            const g = Math.floor((b - f + 1) / 3);
+            const h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4);
+            const k = c % 4;
+            const l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+            const day = ((h + l - 7 * m + 114) % 31) + 1;
+            return new Date(year, month, day);
+        }
+
+        function getItalianHolidayName(year, monthIndex, day) {
+            const fixed = {
+                "0-1": "Capodanno",
+                "0-6": "Epifania",
+                "3-25": "Festa della Liberazione",
+                "4-1": "Festa del Lavoro",
+                "5-2": "Festa della Repubblica",
+                "7-15": "Ferragosto",
+                "10-1": "Tutti i Santi",
+                "11-8": "Immacolata Concezione",
+                "11-25": "Natale",
+                "11-26": "Santo Stefano"
+            };
+            const key = `${monthIndex}-${day}`;
+            if (fixed[key]) return fixed[key];
+
+            const easter = getEasterDate(year);
+            const easterMonday = new Date(year, easter.getMonth(), easter.getDate() + 1);
+
+            if (easter.getMonth() === monthIndex && easter.getDate() === day) return "Pasqua";
+            if (easterMonday.getMonth() === monthIndex && easterMonday.getDate() === day) return "Lunedì dell'Angelo (Pasquetta)";
+
+            return null;
+        }
+
+        function formatEuro(val) {
+            return val.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2800);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-cotral-blue', 'text-white', 'shadow-sm');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('bg-cotral-blue', 'text-white', 'shadow-sm');
+            activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+
+            if (tabId === 'tab-calendario') {
+                renderCalendar();
+            }
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal('modal-tabella');
+        });
+
+        function syncTurniTotali(val) {
+            const num = Math.max(0, parseInt(val, 10) || 0);
+            document.getElementById('excl-turni-totali').value = num;
+            document.getElementById('kpi2-turni').value = num;
+            calculateAll();
+        }
+
+        function onKpi1PercentChange() {
+            const pct = parseFloat(document.getElementById('kpi1-percent').value) || 0;
+            let fascia = "4";
+            if (pct >= 100) fascia = "1";
+            else if (pct >= 99.00) fascia = "2";
+            else if (pct >= 98.00) fascia = "3";
+            document.getElementById('kpi1-fascia').value = fascia;
+            calculateAll();
+        }
+
+        function onKpi1FasciaChange() {
+            const fascia = document.getElementById('kpi1-fascia').value;
+            const pctInput = document.getElementById('kpi1-percent');
+            if (fascia === "1") pctInput.value = "100.00";
+            else if (fascia === "2") pctInput.value = "99.50";
+            else if (fascia === "3") pctInput.value = "98.50";
+            else pctInput.value = "97.00";
+            calculateAll();
+        }
+
+        function getKpi2Data(turniTotali) {
+            if (turniTotali >= 25) return { rowIdx: 0, base: 85, label: "Fascia 1 (≥ 25)" };
+            if (turniTotali === 24) return { rowIdx: 1, base: 60, label: "Fascia 2 (24)" };
+            if (turniTotali === 23) return { rowIdx: 2, base: 45, label: "Fascia 3 (23)" };
+            return { rowIdx: 3, base: 0, label: "Fascia 4 (< 23)" };
+        }
+
+        function getKpi2bisData(rowIdx, oreEccedenza) {
+            let colIdx = 3;
+            let colLabel = "≤ 10 ore (0..10)";
+            if (oreEccedenza > 20) { colIdx = 0; colLabel = "> 20 ore/mese"; }
+            else if (oreEccedenza > 15) { colIdx = 1; colLabel = "> 15 ≤ 20 ore"; }
+            else if (oreEccedenza > 10) { colIdx = 2; colLabel = "> 10 ≤ 15 ore"; }
+            else if (oreEccedenza >= 0) { colIdx = 3; colLabel = "≤ 10 ore (0..10)"; }
+            else { colIdx = 4; colLabel = "< 0 ore (negativo)"; }
+
+            const multiplier = MULTIPLIER_MATRIX[rowIdx][colIdx];
+            return { colIdx, colLabel, multiplier };
+        }
+
+        function computeMonthlyAward({ kpi1Premio, turniTotali, oreEccedenza, kpi3Fascia, isExcluded, reqAnnuale, reqTrimestrale }) {
+            const kpi2 = getKpi2Data(turniTotali);
+            const kpi2bis = getKpi2bisData(kpi2.rowIdx, oreEccedenza);
+            const kpi2Total = kpi2.base * kpi2bis.multiplier;
+            const subtotal = kpi1Premio + kpi2Total;
+
+            let kpi3Delta = 0;
+            let netBeforeExclusion = 0;
+
+            if (kpi3Fascia === 1) {
+                kpi3Delta = 30;
+                netBeforeExclusion = subtotal + 30;
+            } else if (kpi3Fascia === 2) {
+                kpi3Delta = -(subtotal * 0.20);
+                netBeforeExclusion = subtotal * 0.80;
+            } else if (kpi3Fascia === 3) {
+                kpi3Delta = -(subtotal * 0.50);
+                netBeforeExclusion = subtotal * 0.50;
+            } else if (kpi3Fascia === 4) {
+                kpi3Delta = -(subtotal * 0.80);
+                netBeforeExclusion = subtotal * 0.20;
+            } else {
+                kpi3Delta = -subtotal;
+                netBeforeExclusion = 0;
+            }
+
+            const blockedByCompany = !reqAnnuale || !reqTrimestrale;
+            const net = (isExcluded || blockedByCompany) ? 0 : Math.max(0, netBeforeExclusion);
+
+            return {
+                kpi2Base: kpi2.base,
+                kpi2RowIdx: kpi2.rowIdx,
+                kpi2Label: kpi2.label,
+                kpi2bisColIdx: kpi2bis.colIdx,
+                kpi2bisColLabel: kpi2bis.colLabel,
+                multiplier: kpi2bis.multiplier,
+                kpi2Total,
+                subtotal,
+                kpi3Delta,
+                net
+            };
+        }
+
+        function calculateAll(shouldSave = true) {
+            const reqAnnuale = document.getElementById('req-annuale').checked;
+            const reqTrimestrale = document.getElementById('req-trimestrale').checked;
+
+            const lblAnn = document.getElementById('lbl-req-annuale');
+            lblAnn.textContent = reqAnnuale ? "SÌ" : "NO";
+            lblAnn.className = reqAnnuale ? "ms-2.5 text-sm font-bold text-emerald-700" : "ms-2.5 text-sm font-bold text-red-600";
+
+            const lblTrim = document.getElementById('lbl-req-trimestrale');
+            lblTrim.textContent = reqTrimestrale ? "SÌ" : "NO";
+            lblTrim.className = reqTrimestrale ? "ms-2.5 text-sm font-bold text-emerald-700" : "ms-2.5 text-sm font-bold text-red-600";
+
+            const exclusionReasons = [];
+            if (!reqAnnuale) exclusionReasons.push("Bilancio aziendale anno precedente non positivo (KPI Annuale).");
+            if (!reqTrimestrale) exclusionReasons.push("Obiettivi aziendali trimestrali non raggiunti.");
+
+            if (document.getElementById('excl-disciplinare').value === 'si') {
+                exclusionReasons.push("Provvedimento disciplinare art. 42 > 1 giorno.");
+            }
+
+            const malEventi = parseInt(document.getElementById('excl-malattia-eventi').value, 10) || 0;
+            const malGiorni = parseInt(document.getElementById('excl-malattia-giorni').value, 10) || 0;
+            if (malEventi > 1) exclusionReasons.push(`Eventi di malattia nel mese (${malEventi} > 1 evento).`);
+            if (malGiorni > 5) exclusionReasons.push(`Giorni di malattia nel mese (${malGiorni} > 5 giorni).`);
+
+            const turniEsigibili = parseInt(document.getElementById('excl-turni-esigibili').value, 10) || 0;
+            if (turniEsigibili < 6) exclusionReasons.push(`Turni esigibili coperti insufficienti (${turniEsigibili} < 6).`);
+
+            const turniTotali = parseInt(document.getElementById('excl-turni-totali').value, 10) || 0;
+            if (turniTotali < 22) exclusionReasons.push(`Turni + Congedi + Formazione + Collegio < 22 (${turniTotali}).`);
+
+            const sinistriNum = parseInt(document.getElementById('excl-sinistri-num').value, 10) || 0;
+            const sinistriVal = parseFloat(document.getElementById('excl-sinistri-valore').value) || 0;
+            if (sinistriNum > 1 && sinistriVal > 7000) {
+                exclusionReasons.push(`Sinistri nel trimestre > 1 (${sinistriNum}) con valore > 7.000 € (${formatEuro(sinistriVal)}).`);
+            }
+
+            const isExcluded = exclusionReasons.length > 0;
+
+            const kpi1Fascia = document.getElementById('kpi1-fascia').value;
+            const kpi1Premio = kpi1Fascia === "1" ? 50 : kpi1Fascia === "2" ? 30 : kpi1Fascia === "3" ? 10 : 0;
+
+            for (let i = 1; i <= 4; i++) {
+                const box = document.getElementById('kpi1-box-' + i);
+                box.className = (String(i) === kpi1Fascia)
+                    ? "p-2 rounded-lg border-2 border-cotral-light bg-blue-50 font-semibold transition"
+                    : "p-2 rounded-lg border border-slate-200 bg-slate-50 opacity-75 transition";
+            }
+            document.getElementById('badge-kpi1').textContent = kpi1Premio + " €";
+
+            const oreEccedenza = parseFloat(document.getElementById('kpi2bis-ore').value) || 0;
+            const kpi3Radio = document.querySelector('input[name="kpi3-fascia"]:checked');
+            const kpi3Fascia = kpi3Radio ? parseInt(kpi3Radio.value, 10) : 1;
+
+            document.querySelectorAll('.kpi3-card').forEach(card => {
+                if (Number(card.dataset.fascia) === kpi3Fascia) {
+                    card.classList.add('border-2', 'border-cotral-light', 'bg-blue-50/50');
+                    card.classList.remove('border', 'border-slate-200');
+                } else {
+                    card.classList.remove('border-2', 'border-cotral-light', 'bg-blue-50/50');
+                    card.classList.add('border', 'border-slate-200');
+                }
+            });
+
+            const calc = computeMonthlyAward({
+                kpi1Premio,
+                turniTotali,
+                oreEccedenza,
+                kpi3Fascia,
+                isExcluded,
+                reqAnnuale,
+                reqTrimestrale
+            });
+
+            document.getElementById('kpi2-fascia-label').textContent = calc.kpi2Label;
+            document.getElementById('kpi2-base-label').textContent = calc.kpi2Base + " €";
+            document.getElementById('kpi2bis-col-label').textContent = calc.kpi2bisColLabel;
+            document.getElementById('kpi2bis-mult-label').textContent = calc.multiplier.toFixed(1).replace('.', ',') + "x";
+            document.getElementById('kpi2-formula-preview').textContent = `${calc.kpi2Base} € × ${calc.multiplier.toFixed(1).replace('.', ',')} = ${formatEuro(calc.kpi2Total)}`;
+            document.getElementById('badge-kpi2-tot').textContent = formatEuro(calc.kpi2Total);
+
+            const kpi3BadgeTexts = { 1: "+ 30 €", 2: "- 20%", 3: "- 50%", 4: "- 80%", 5: "- 100%" };
+            document.getElementById('badge-kpi3').textContent = kpi3BadgeTexts[kpi3Fascia] || "+ 30 €";
+
+            renderMatrix(calc.kpi2RowIdx, calc.kpi2bisColIdx);
+
+            const exclusionAlert = document.getElementById('exclusion-alert');
+            const statusPill = document.getElementById('status-pill');
+
+            if (isExcluded) {
+                exclusionAlert.classList.remove('hidden');
+                document.getElementById('exclusion-reasons-list').innerHTML = exclusionReasons.map(r => `<li>${r}</li>`).join('');
+                statusPill.className = "text-xs font-bold bg-red-500 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1";
+                statusPill.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Escluso`;
+            } else {
+                exclusionAlert.classList.add('hidden');
+                statusPill.className = "text-xs font-bold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1";
+                statusPill.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Idoneo`;
+            }
+
+            const turniSem = parseInt(document.getElementById('kpi4-turni-sem').value, 10) || 0;
+            const festiviNum = parseInt(document.getElementById('kpi4-festivi-num').value, 10) || 0;
+
+            let welfareBonus = (turniSem >= 139) ? 400 : 0;
+            let festiviBonus = 0;
+            let festBoxIdx = 0;
+
+            if (festiviNum >= 13) { festiviBonus = 100; festBoxIdx = 4; }
+            else if (festiviNum >= 11) { festiviBonus = 80; festBoxIdx = 3; }
+            else if (festiviNum >= 9) { festiviBonus = 60; festBoxIdx = 2; }
+            else if (festiviNum >= 6) { festiviBonus = 40; festBoxIdx = 1; }
+
+            if (!reqAnnuale) {
+                welfareBonus = 0;
+                festiviBonus = 0;
+            }
+
+            const totalSemestraleBonus = welfareBonus + festiviBonus;
+
+            const pctSem = Math.min(100, Math.round((turniSem / 139) * 100));
+            const progressBar = document.getElementById('kpi4-progress-bar');
+            const progressText = document.getElementById('kpi4-progress-text');
+            progressBar.style.width = pctSem + '%';
+            progressBar.className = (turniSem >= 139)
+                ? "bg-emerald-500 h-2.5 rounded-full transition-all duration-300"
+                : "bg-amber-500 h-2.5 rounded-full transition-all duration-300";
+            progressText.textContent = (turniSem >= 139)
+                ? `${turniSem} / 139 (Raggiunto!)`
+                : `${turniSem} / 139 (Mancano ${139 - turniSem})`;
+            progressText.className = (turniSem >= 139) ? "font-bold text-emerald-600" : "font-bold text-amber-600";
+
+            document.getElementById('kpi4-welfare-badge').textContent = welfareBonus + " € Welfare";
+            document.getElementById('kpi4-festivi-badge').textContent = festiviBonus + " €";
+            document.getElementById('badge-kpi4').textContent = totalSemestraleBonus + " €";
+
+            for (let i = 0; i <= 4; i++) {
+                const fBox = document.getElementById('fest-box-' + i);
+                fBox.className = (i === festBoxIdx)
+                    ? "p-2 rounded-lg border-2 border-cotral-light bg-blue-50 font-semibold transition"
+                    : "p-2 rounded-lg border border-slate-200 bg-white opacity-75 transition";
+            }
+
+            document.getElementById('sum-kpi1').textContent = formatEuro(kpi1Premio);
+            document.getElementById('sum-kpi2-base').textContent = formatEuro(calc.kpi2Base);
+            document.getElementById('sum-mult').textContent = calc.multiplier.toFixed(1).replace('.', ',') + "x";
+            document.getElementById('sum-kpi2-tot').textContent = formatEuro(calc.kpi2Total);
+            document.getElementById('sum-subtotal').textContent = formatEuro(calc.subtotal);
+
+            const sumKpi3El = document.getElementById('sum-kpi3');
+            if (calc.kpi3Delta >= 0) {
+                sumKpi3El.textContent = "+ " + formatEuro(calc.kpi3Delta);
+                sumKpi3El.className = "font-bold text-emerald-600";
+            } else {
+                sumKpi3El.textContent = "- " + formatEuro(Math.abs(calc.kpi3Delta));
+                sumKpi3El.className = "font-bold text-red-600";
+            }
+
+            document.getElementById('total-mensile').textContent = formatEuro(calc.net);
+            document.getElementById('sum-kpi4-welfare').textContent = formatEuro(welfareBonus);
+            document.getElementById('sum-kpi4-festivi').textContent = formatEuro(festiviBonus);
+            document.getElementById('total-semestrale').textContent = formatEuro(totalSemestraleBonus);
+
+            updateSimulatorTotals(totalSemestraleBonus, reqAnnuale, reqTrimestrale);
+            if (shouldSave) saveState();
+            lucide.createIcons();
+        }
+
+        function renderMatrix(activeRow, activeCol) {
+            const tbody = document.getElementById('matrix-body');
+            let html = '';
+            MULTIPLIER_MATRIX.forEach((row, rIdx) => {
+                const isRowActive = (rIdx === activeRow);
+                html += `<tr class="${isRowActive ? 'bg-blue-50/40' : ''}">`;
+                html += `<td class="p-2.5 text-left font-semibold ${isRowActive ? 'text-cotral-blue' : 'text-slate-700'}">${FASCIA2_LABELS[rIdx]}</td>`;
+                
+                row.forEach((val, cIdx) => {
+                    const isCellActive = (isRowActive && cIdx === activeCol);
+                    const cellClass = isCellActive 
+                        ? 'bg-cotral-light text-white font-extrabold ring-2 ring-cotral-blue rounded shadow-sm' 
+                        : 'text-slate-600 font-medium';
+                    html += `<td class="p-2.5 ${cellClass}">${val.toFixed(1).replace('.', ',')}</td>`;
+                });
+                html += `</tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function getCurrentMonthSnapshot() {
+            const kpi1Fascia = document.getElementById('kpi1-fascia').value;
+            const kpi1 = kpi1Fascia === "1" ? 50 : kpi1Fascia === "2" ? 30 : kpi1Fascia === "3" ? 10 : 0;
+            const turni = parseInt(document.getElementById('kpi2-turni').value, 10) || 0;
+            const ore = parseFloat(document.getElementById('kpi2bis-ore').value) || 0;
+            const kpi3Radio = document.querySelector('input[name="kpi3-fascia"]:checked');
+            const kpi3 = kpi3Radio ? parseInt(kpi3Radio.value, 10) : 1;
+            const isExcluded = !document.getElementById('exclusion-alert').classList.contains('hidden');
+
+            return { kpi1, turni, ore, kpi3, excluded: isExcluded };
+        }
+
+        function saveCurrentToMonth() {
+            const idx = parseInt(document.getElementById('sim-target-month').value, 10);
+            const snap = getCurrentMonthSnapshot();
+            simulatedMonths[idx] = { ...simulatedMonths[idx], ...snap };
+            calculateAll();
+            showToast(`Dati salvati su ${simulatedMonths[idx].name}`);
+        }
+
+        function copyCurrentMonthToAll() {
+            const snap = getCurrentMonthSnapshot();
+            simulatedMonths = simulatedMonths.map(m => ({ ...m, ...snap }));
+            calculateAll();
+            showToast("Configurazione applicata a tutti i 6 mesi!");
+        }
+
+        function syncSemestraleFromSim() {
+            const totTurni = simulatedMonths.reduce((acc, m) => acc + (parseInt(m.turni, 10) || 0), 0);
+            document.getElementById('kpi4-turni-sem').value = totTurni;
+            calculateAll();
+            showToast(`Totale turni semestrale aggiornato a ${totTurni}`);
+        }
+
+        function updateSimulatorTotals(semestraleBonus, reqAnnuale, reqTrimestrale) {
+            const tbody = document.getElementById('sim-table-body');
+            let html = '';
+            let totEuro = 0;
+            let totTurni = 0;
+
+            simulatedMonths.forEach((m) => {
+                const mTurni = parseInt(m.turni, 10) || 0;
+                const mOre = parseFloat(m.ore) || 0;
+                const mKpi3 = parseInt(m.kpi3, 10) || 1;
+                const mExcluded = Boolean(m.excluded);
+
+                const award = computeMonthlyAward({
+                    kpi1Premio: m.kpi1,
+                    turniTotali: mTurni,
+                    oreEccedenza: mOre,
+                    kpi3Fascia: mKpi3,
+                    isExcluded: mExcluded,
+                    reqAnnuale,
+                    reqTrimestrale
+                });
+
+                totEuro += award.net;
+                totTurni += mTurni;
+
+                const isOk = !mExcluded && reqAnnuale && reqTrimestrale;
+                const badge = isOk
+                    ? `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-semibold">OK</span>`
+                    : `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-semibold">Escluso</span>`;
+                
+                const kpi3Text = mKpi3 === 1 ? "+30 €" : mKpi3 === 2 ? "-20%" : mKpi3 === 3 ? "-50%" : mKpi3 === 4 ? "-80%" : "-100%";
+
+                html += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-semibold text-slate-800">${m.name}</td>
+                        <td class="p-3">${m.kpi1} €</td>
+                        <td class="p-3">${mTurni} turni</td>
+                        <td class="p-3">${mOre} ore</td>
+                        <td class="p-3">${kpi3Text}</td>
+                        <td class="p-3">${badge}</td>
+                        <td class="p-3 text-right font-bold text-slate-900">${formatEuro(award.net)}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('sim-tot-turni').textContent = `${totTurni} turni`;
+            document.getElementById('sim-tot-euro').textContent = formatEuro(totEuro);
+            document.getElementById('total-grand-semestre').textContent = formatEuro(totEuro + semestraleBonus);
+        }
+
+        // --- FUNZIONI CALENDARIO & DIARIO ---
+        function getDateKey(year, monthIndex, day) {
+            return `${year}-${monthIndex}-${day}`;
+        }
+
+        function getDefaultEntry() {
+            return {
+                activity: "nessuna",
+                dayType: "auto",
+                turnoVettura: "",
+                durataTurno: "",
+                durataStraordinario: ""
+            };
+        }
+
+        function getEffectiveDayType(year, monthIndex, day, entry) {
+            const forced = entry?.dayType || "auto";
+            if (forced !== "auto") return forced;
+
+            const d = new Date(year, monthIndex, day);
+            const dow = d.getDay();
+            const holidayName = getItalianHolidayName(year, monthIndex, day);
+
+            if (holidayName) return "festivo";
+            if (dow === 0) return "domenica";
+            if (dow === 6) return "sabato";
+            return "feriale";
+        }
+
+        function updateCalendarEntry(year, monthIndex, day, field, value, rerender = true) {
+            const key = getDateKey(year, monthIndex, day);
+            const current = { ...getDefaultEntry(), ...(calendarEntries[key] || {}) };
+            calendarEntries[key] = { ...current, [field]: value };
+            saveState();
+            if (rerender) {
+                renderCalendar();
+            } else {
+                updateCalendarStatsOnly(year, monthIndex);
+            }
+        }
+
+        function formatSexagesimalFieldOnBlur(year, monthIndex, day, field, inputEl) {
+            const mins = parseSexagesimalToMinutes(inputEl.value);
+            const formatted = inputEl.value.trim() ? formatMinutesToSexagesimal(mins) : "";
+            inputEl.value = formatted;
+            updateCalendarEntry(year, monthIndex, day, field, formatted, false);
+        }
+
+        function fillWorkdaysWithShifts() {
+            const year = parseInt(document.getElementById('cal-year').value, 10);
+            const monthIndex = parseInt(document.getElementById('cal-month').value, 10);
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const key = getDateKey(year, monthIndex, day);
+                const existing = { ...getDefaultEntry(), ...(calendarEntries[key] || {}) };
+                const effectiveType = getEffectiveDayType(year, monthIndex, day, existing);
+                if (effectiveType === "feriale" && existing.activity === "nessuna") {
+                    calendarEntries[key] = { ...existing, activity: "turno" };
+                }
+            }
+            renderCalendar();
+            saveState();
+            showToast("Giorni feriali impostati su Turno Coperto");
+        }
+
+        function clearCurrentMonthCalendar() {
+            const year = parseInt(document.getElementById('cal-year').value, 10);
+            const monthIndex = parseInt(document.getElementById('cal-month').value, 10);
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                delete calendarEntries[getDateKey(year, monthIndex, day)];
+            }
+            renderCalendar();
+            saveState();
+            showToast("Mese svuotato nel calendario");
+        }
+
+        function getMonthCalendarStats(year, monthIndex) {
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+            let turniCoperti = 0;
+            let turniEsigibili = 0;
+            let turniUtili = 0;
+            let sabati = 0;
+            let domFestivi = 0;
+            let domFestiviCoperti = 0;
+            let malattiaGiorni = 0;
+            let malattiaEventi = 0;
+            let prevWasMalattia = false;
+            let durataTurnoMinuti = 0;
+            let straordinarioMinuti = 0;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const entry = { ...getDefaultEntry(), ...(calendarEntries[getDateKey(year, monthIndex, day)] || {}) };
+                const type = getEffectiveDayType(year, monthIndex, day, entry);
+                const act = entry.activity;
+
+                if (type === "sabato") sabati++;
+                if (type === "domenica" || type === "festivo") domFestivi++;
+
+                if (act === "turno") {
+                    turniCoperti++;
+                    if (type === "domenica" || type === "festivo") domFestiviCoperti++;
+                }
+
+                const isFestivoDay = (type === "festivo");
+                if (ESIGIBILE_ACTIVITIES.has(act) || (isFestivoDay && !NON_ESIGIBILE_ACTIVITIES.has(act) && act !== "malattia")) {
+                    turniEsigibili++;
+                }
+
+                if (UTILE_ACTIVITIES.has(act) || (isFestivoDay && !NON_ESIGIBILE_ACTIVITIES.has(act) && act !== "malattia")) {
+                    turniUtili++;
+                }
+
+                if (act === "malattia") {
+                    malattiaGiorni++;
+                    if (!prevWasMalattia) {
+                        malattiaEventi++;
+                    }
+                    prevWasMalattia = true;
+                } else {
+                    prevWasMalattia = false;
+                }
+
+                durataTurnoMinuti += parseSexagesimalToMinutes(entry.durataTurno);
+                straordinarioMinuti += parseSexagesimalToMinutes(entry.durataStraordinario);
+            }
+
+            return {
+                turniCoperti,
+                turniEsigibili,
+                turniUtili,
+                sabati,
+                domFestivi,
+                domFestiviCoperti,
+                malattiaGiorni,
+                malattiaEventi,
+                durataTurnoMinuti,
+                straordinarioMinuti,
+                totaleMinuti: durataTurnoMinuti + straordinarioMinuti
+            };
+        }
+
+        function updateCalendarStatsOnly(year, monthIndex) {
+            const stats = getMonthCalendarStats(year, monthIndex);
+            document.getElementById('cal-stat-utili').textContent = `${stats.turniEsigibili} / ${stats.turniUtili}`;
+            document.getElementById('cal-stat-sab-domfest').textContent = `${stats.sabati} / ${stats.domFestivi}`;
+            document.getElementById('cal-stat-malattia').textContent = `${stats.malattiaGiorni} / ${stats.malattiaEventi}`;
+            document.getElementById('cal-stat-durata-turni').textContent = formatMinutesToSexagesimal(stats.durataTurnoMinuti);
+            document.getElementById('cal-stat-straord').textContent = formatMinutesToSexagesimal(stats.straordinarioMinuti);
+            document.getElementById('cal-stat-tot-ore').textContent = formatMinutesToSexagesimal(stats.totaleMinuti);
+        }
+
+        function applyCalendarToKpis() {
+            const year = parseInt(document.getElementById('cal-year').value, 10);
+            const monthIndex = parseInt(document.getElementById('cal-month').value, 10);
+            const stats = getMonthCalendarStats(year, monthIndex);
+
+            document.getElementById('excl-turni-esigibili').value = stats.turniEsigibili;
+            document.getElementById('excl-turni-totali').value = stats.turniUtili;
+            document.getElementById('kpi2-turni').value = stats.turniUtili;
+            document.getElementById('excl-malattia-giorni').value = stats.malattiaGiorni;
+            document.getElementById('excl-malattia-eventi').value = stats.malattiaEventi;
+
+            if (stats.straordinarioMinuti !== 0) {
+                const oreDecimali = Math.round((stats.straordinarioMinuti / 60) * 100) / 100;
+                document.getElementById('kpi2bis-ore').value = oreDecimali;
+            }
+
+            if (stats.domFestiviCoperti > 0) {
+                document.getElementById('kpi4-festivi-num').value = stats.domFestiviCoperti;
+            }
+
+            calculateAll();
+            showToast(`Conteggi applicati (Straord.: ${formatMinutesToSexagesimal(stats.straordinarioMinuti)})`);
+        }
+
+        function renderCalendar() {
+            const year = parseInt(document.getElementById('cal-year').value, 10);
+            const monthIndex = parseInt(document.getElementById('cal-month').value, 10);
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+            const container = document.getElementById('calendar-days-list');
+
+            updateCalendarStatsOnly(year, monthIndex);
+
+            let html = '';
+            for (let day = 1; day <= daysInMonth; day++) {
+                const d = new Date(year, monthIndex, day);
+                const dowName = WEEKDAY_NAMES_SHORT[d.getDay()];
+                const holidayName = getItalianHolidayName(year, monthIndex, day);
+                const key = getDateKey(year, monthIndex, day);
+                const entry = { ...getDefaultEntry(), ...(calendarEntries[key] || {}) };
+                const effectiveType = getEffectiveDayType(year, monthIndex, day, entry);
+
+                let rowStyle = "bg-white border-slate-200";
+                let badgeHtml = `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">${dowName}</span>`;
+
+                if (effectiveType === "festivo") {
+                    rowStyle = "bg-rose-50/70 border-rose-300";
+                    badgeHtml = `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-200 text-rose-900">Festivo (esigibile)${holidayName ? ` • ${holidayName}` : ''}</span>`;
+                } else if (effectiveType === "domenica") {
+                    rowStyle = "bg-rose-50/50 border-rose-200";
+                    badgeHtml = `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">Domenica</span>`;
+                } else if (effectiveType === "sabato") {
+                    rowStyle = "bg-amber-50/60 border-amber-200";
+                    badgeHtml = `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">Sabato</span>`;
+                }
+
+                if (ESIGIBILE_ACTIVITIES.has(entry.activity)) {
+                    rowStyle = "bg-emerald-50/50 border-emerald-300";
+                } else if (entry.activity === "malattia") {
+                    rowStyle = "bg-purple-50/60 border-purple-300";
+                }
+
+                const escTurnoVettura = (entry.turnoVettura || '').replace(/"/g, '&quot;');
+                const escDurataTurno = (entry.durataTurno || '').replace(/"/g, '&quot;');
+                const escDurataStraord = (entry.durataStraordinario || '').replace(/"/g, '&quot;');
+
+                html += `
+                    <div class="p-3 rounded-xl border ${rowStyle} space-y-2.5 transition">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center shrink-0">
+                                    ${String(day).padStart(2, '0')}
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs font-bold text-slate-800">${dowName} ${day}/${String(monthIndex + 1).padStart(2, '0')}</span>
+                                    ${badgeHtml}
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:min-w-[340px]">
+                                <select aria-label="Attività giorno ${day}" onchange="updateCalendarEntry(${year}, ${monthIndex}, ${day}, 'activity', this.value)" class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    <option value="nessuna" ${entry.activity === 'nessuna' ? 'selected' : ''}>— Nessuna voce —</option>
+                                    <option value="turno" ${entry.activity === 'turno' ? 'selected' : ''}>Turno Esigibile Coperto</option>
+                                    <option value="lavorativo" ${entry.activity === 'lavorativo' ? 'selected' : ''}>Giorno lavorativo</option>
+                                    <option value="distacco_aziendale" ${entry.activity === 'distacco_aziendale' ? 'selected' : ''}>Distacco aziendale (esigibile)</option>
+                                    <option value="distacco_sindacale" ${entry.activity === 'distacco_sindacale' ? 'selected' : ''}>Distacco sindacale (non esigibile)</option>
+                                    <option value="recupero_riposo" ${entry.activity === 'recupero_riposo' ? 'selected' : ''}>Recupero riposo (non esigibile)</option>
+                                    <option value="assenza_non_esigibile" ${entry.activity === 'assenza_non_esigibile' ? 'selected' : ''}>Assenza non esigibile (altri motivi)</option>
+                                    <option value="legge_104" ${entry.activity === 'legge_104' ? 'selected' : ''}>Legge 104</option>
+                                    <option value="malattia" ${entry.activity === 'malattia' ? 'selected' : ''}>Malattia</option>
+                                    <option value="congedo" ${entry.activity === 'congedo' ? 'selected' : ''}>Congedo / Ferie</option>
+                                    <option value="formazione" ${entry.activity === 'formazione' ? 'selected' : ''}>Formazione</option>
+                                    <option value="collegio" ${entry.activity === 'collegio' ? 'selected' : ''}>Collegio Medico</option>
+                                    <option value="disciplinare" ${entry.activity === 'disciplinare' ? 'selected' : ''}>Provvedimento Disciplinare</option>
+                                    <option value="altro" ${entry.activity === 'altro' ? 'selected' : ''}>Altro</option>
+                                </select>
+
+                                <select aria-label="Tipo giorno ${day}" onchange="updateCalendarEntry(${year}, ${monthIndex}, ${day}, 'dayType', this.value)" class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                                    <option value="auto" ${entry.dayType === 'auto' ? 'selected' : ''}>Tipo: Automatico (${dowName}${holidayName ? ' / Fest.' : ''})</option>
+                                    <option value="feriale" ${entry.dayType === 'feriale' ? 'selected' : ''}>Segna come Feriale</option>
+                                    <option value="sabato" ${entry.dayType === 'sabato' ? 'selected' : ''}>Segna come Sabato</option>
+                                    <option value="domenica" ${entry.dayType === 'domenica' ? 'selected' : ''}>Segna come Domenica</option>
+                                    <option value="festivo" ${entry.dayType === 'festivo' ? 'selected' : ''}>Segna come Festività (esigibile)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200/70">
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-500 block mb-0.5">Turno / Vettura</label>
+                                <input type="text" placeholder="Es. T12 / V4501" value="${escTurnoVettura}" oninput="updateCalendarEntry(${year}, ${monthIndex}, ${day}, 'turnoVettura', this.value, false)" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-500 block mb-0.5">Durata turno (HH:MM)</label>
+                                <input type="text" inputmode="text" placeholder="Es. 07:30" value="${escDurataTurno}" oninput="updateCalendarEntry(${year}, ${monthIndex}, ${day}, 'durataTurno', this.value, false)" onblur="formatSexagesimalFieldOnBlur(${year}, ${monthIndex}, ${day}, 'durataTurno', this)" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-500 block mb-0.5">Durata straordinario (HH:MM)</label>
+                                <input type="text" inputmode="text" placeholder="Es. 01:45" value="${escDurataStraord}" oninput="updateCalendarEntry(${year}, ${monthIndex}, ${day}, 'durataStraordinario', this.value, false)" onblur="formatSexagesimalFieldOnBlur(${year}, ${monthIndex}, ${day}, 'durataStraordinario', this)" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-emerald-800 focus:ring-2 focus:ring-cotral-light focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function saveState() {
+            try {
+                const state = {
+                    reqAnnuale: document.getElementById('req-annuale').checked,
+                    reqTrimestrale: document.getElementById('req-trimestrale').checked,
+                    disciplinare: document.getElementById('excl-disciplinare').value,
+                    malEventi: document.getElementById('excl-malattia-eventi').value,
+                    malGiorni: document.getElementById('excl-malattia-giorni').value,
+                    turniEsigibili: document.getElementById('excl-turni-esigibili').value,
+                    turniTotali: document.getElementById('excl-turni-totali').value,
+                    sinistriNum: document.getElementById('excl-sinistri-num').value,
+                    sinistriVal: document.getElementById('excl-sinistri-valore').value,
+                    kpi1Percent: document.getElementById('kpi1-percent').value,
+                    kpi1Fascia: document.getElementById('kpi1-fascia').value,
+                    kpi2Turni: document.getElementById('kpi2-turni').value,
+                    kpi2bisOre: document.getElementById('kpi2bis-ore').value,
+                    kpi3Fascia: document.querySelector('input[name="kpi3-fascia"]:checked')?.value || "1",
+                    kpi4TurniSem: document.getElementById('kpi4-turni-sem').value,
+                    kpi4FestiviNum: document.getElementById('kpi4-festivi-num').value,
+                    calYear: document.getElementById('cal-year').value,
+                    calMonth: document.getElementById('cal-month').value,
+                    simulatedMonths,
+                    calendarEntries
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (_) {}
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const s = JSON.parse(raw);
+
+                if (typeof s.reqAnnuale === 'boolean') document.getElementById('req-annuale').checked = s.reqAnnuale;
+                if (typeof s.reqTrimestrale === 'boolean') document.getElementById('req-trimestrale').checked = s.reqTrimestrale;
+                if (s.disciplinare !== undefined) document.getElementById('excl-disciplinare').value = s.disciplinare;
+                if (s.malEventi !== undefined) document.getElementById('excl-malattia-eventi').value = s.malEventi;
+                if (s.malGiorni !== undefined) document.getElementById('excl-malattia-giorni').value = s.malGiorni;
+                if (s.turniEsigibili !== undefined) document.getElementById('excl-turni-esigibili').value = s.turniEsigibili;
+                if (s.turniTotali !== undefined) document.getElementById('excl-turni-totali').value = s.turniTotali;
+                if (s.sinistriNum !== undefined) document.getElementById('excl-sinistri-num').value = s.sinistriNum;
+                if (s.sinistriVal !== undefined) document.getElementById('excl-sinistri-valore').value = s.sinistriVal;
+                if (s.kpi1Percent !== undefined) document.getElementById('kpi1-percent').value = s.kpi1Percent;
+                if (s.kpi1Fascia !== undefined) document.getElementById('kpi1-fascia').value = s.kpi1Fascia;
+                if (s.kpi2Turni !== undefined) document.getElementById('kpi2-turni').value = s.kpi2Turni;
+                if (s.kpi2bisOre !== undefined) document.getElementById('kpi2bis-ore').value = s.kpi2bisOre;
+                if (s.kpi3Fascia !== undefined) {
+                    const radio = document.querySelector(`input[name="kpi3-fascia"][value="${s.kpi3Fascia}"]`);
+                    if (radio) radio.checked = true;
+                }
+                if (s.kpi4TurniSem !== undefined) document.getElementById('kpi4-turni-sem').value = s.kpi4TurniSem;
+                if (s.kpi4FestiviNum !== undefined) document.getElementById('kpi4-festivi-num').value = s.kpi4FestiviNum;
+                if (s.calYear !== undefined) document.getElementById('cal-year').value = s.calYear;
+                if (s.calMonth !== undefined) document.getElementById('cal-month').value = s.calMonth;
+                if (Array.isArray(s.simulatedMonths) && s.simulatedMonths.length === 6) {
+                    simulatedMonths = s.simulatedMonths;
+                }
+                if (s.calendarEntries && typeof s.calendarEntries === 'object') {
+                    calendarEntries = s.calendarEntries;
+                }
+            } catch (_) {}
+        }
+
+        function resetAll() {
+            try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+            simulatedMonths = structuredClone(DEFAULT_MONTHS);
+            calendarEntries = {};
+
+            document.getElementById('req-annuale').checked = true;
+            document.getElementById('req-trimestrale').checked = true;
+            document.getElementById('excl-disciplinare').value = 'no';
+            document.getElementById('excl-malattia-eventi').value = 0;
+            document.getElementById('excl-malattia-giorni').value = 0;
+            document.getElementById('excl-turni-esigibili').value = 22;
+            document.getElementById('excl-turni-totali').value = 24;
+            document.getElementById('excl-sinistri-num').value = 0;
+            document.getElementById('excl-sinistri-valore').value = 0;
+
+            document.getElementById('kpi1-percent').value = "100.00";
+            document.getElementById('kpi1-fascia').value = "1";
+            document.getElementById('kpi2-turni').value = 24;
+            document.getElementById('kpi2bis-ore').value = 8;
+
+            const radio1 = document.querySelector('input[name="kpi3-fascia"][value="1"]');
+            if (radio1) radio1.checked = true;
+
+            document.getElementById('kpi4-turni-sem').value = 142;
+            document.getElementById('kpi4-festivi-num').value = 10;
+
+            document.getElementById('cal-year').value = "2026";
+            document.getElementById('cal-month').value = "10";
+
+            renderCalendar();
+            calculateAll(false);
+            showToast("Valori e calendario ripristinati");
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            renderCalendar();
+            lucide.createIcons();
+            calculateAll(false);
+        });
+    </script>
+</body>
+</html>
